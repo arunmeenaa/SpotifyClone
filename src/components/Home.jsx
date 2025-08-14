@@ -48,7 +48,7 @@ const Home = () => {
       if (timeEl) timeEl.innerHTML = "00:00 / 00:00";
     };
 
-    const playIndex = async (idx, { autoplay = true } = {}) => {
+    const playIndex = (idx, { autoplay = true } = {}) => {
       const audio = audioRef.current;
       const list = songsRef.current;
       if (!list.length) return;
@@ -57,19 +57,22 @@ const Home = () => {
       const track = list[indexRef.current];
 
       audio.pause();
-      audio.src = `/songs/${track}`;
       audio.currentTime = 0;
 
+      audio.src = `/songs/${track}`;
       setSongInfo(track);
       highlightActive();
 
       if (autoplay) {
-        try {
-          await audio.play();
-          setPlayIcon(true);
-        } catch {
-          setPlayIcon(false);
-        }
+        audio.onloadedmetadata = async () => {
+          try {
+            await audio.play();
+            setPlayIcon(true);
+          } catch (err) {
+            console.warn("Play interrupted:", err);
+            setPlayIcon(false);
+          }
+        };
       } else {
         setPlayIcon(false);
       }
@@ -170,7 +173,7 @@ const Home = () => {
       }
       renderSongList();
       if (songsRef.current.length) {
-        await playIndex(0, { autoplay: false });
+        playIndex(0, { autoplay: false });
       }
     })();
 
@@ -191,6 +194,7 @@ const Home = () => {
 
   return (
     <div className="container flex bg-black">
+      {/* left section */}
       <div className="left">
         <div className="close">
           <img width="30" className="invert" src="image/close.svg" alt="" />
@@ -213,28 +217,22 @@ const Home = () => {
             <ul></ul>
           </div>
           <div className="footer">
-            <div><a href="https://www.spotify.com/jp/legal/"><span>Legal</span></a></div>
-            <div><a href="https://www.spotify.com/jp/privacy/"><span>Privacy Center</span></a></div>
-            <div><a href="https://www.spotify.com/jp/legal/privacy-policy/"><span>Privacy Policy</span></a></div>
-            <div><a href="https://www.spotify.com/jp/legal/cookies-policy/"><span>Cookies</span></a></div>
-            <div><a href="https://www.spotify.com/jp/legal/privacy-policy/#s3"><span>About Ads</span></a></div>
-            <div><a href="https://www.spotify.com/jp/accessibility/"><span>Accessibility</span></a></div>
+            <div><a href="#"><span>Legal</span></a></div>
+            <div><a href="#"><span>Privacy Center</span></a></div>
+            <div><a href="#"><span>Privacy Policy</span></a></div>
+            <div><a href="#"><span>Cookies</span></a></div>
+            <div><a href="#"><span>About Ads</span></a></div>
+            <div><a href="#"><span>Accessibility</span></a></div>
           </div>
         </div>
       </div>
+
+      {/* right section */}
       <div className="right bg-grey rounded">
         <div className="header">
           <div className="nav">
             <div className="humburgerCont">
               <img width="40px" className="invert humburger" src="image/humburger.svg" alt="" />
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M15 6L9.70711 11.2929C9.37377 11.6262 9.20711 11.7929 9.20711 12C9.20711 12.2071 9.37377 12.3738 9.70711 12.7071L15 18"
-                  stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L14.2929 12.7071C14.6262 12.3738 14.7929 12.2071 14.7929 12C14.7929 11.7929 14.6262 11.6262 14.2929 11.2929L9 6"
-                  stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
             </div>
           </div>
           <div className="button">
